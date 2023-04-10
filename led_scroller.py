@@ -65,7 +65,7 @@ def time_for_char_to_arrive_at_loc(n, loc):
     return (loc + n) * 8 * SPEED_X
 
 
-def Draw(screen, text, t, font_tab):
+def Draw(set_pixel, text, t, font_tab):
 
     offset_x = 128 - t // SPEED_X
     # screen.fill(WHITE)
@@ -97,7 +97,7 @@ def Draw(screen, text, t, font_tab):
             for pixel in piece:
                 x = n * 8 + ll[0] + pixel[0] + offset_x
                 y = ll[1] + pixel[1] + offset_y + BASE_OFFSET_Y
-                screen.SetPixel(x, y, 0, 255, 0)
+                set_pixel((x, y), (0, 255, 0))
 
 
 def MakeMatrix(args):
@@ -186,16 +186,21 @@ def main():
     random.seed(66)
 
     matrix = MakeMatrix(args)
-    dim, FONT_TAB = tetris_font.MakeFontTab(args.font_path, args.font_size, CHARS)
+    dim, FONT_TAB = tetris_font.MakeFontTab(
+        args.font_path, args.font_size, CHARS)
     canvas = matrix.CreateFrameCanvas()
     text = args.text
     t = 0
     print(canvas.width, canvas.height, text)
+
+    def set_pixel(pos, color):
+        canvas.SetPixel(*pos, *color)
+
     while True:
         t += 1
         canvas.Clear()
         canvas.Fill(0, 0, 0)
-        Draw(canvas, text, t, FONT_TAB)
+        Draw(set_pixel, text, t, FONT_TAB)
         canvas = matrix.SwapOnVSync(canvas)
 
 

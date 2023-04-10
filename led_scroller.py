@@ -15,6 +15,7 @@ from PIL import ImageFont, ImageDraw, Image
 
 
 import tetris_font
+import tetris_animation
 
 ATARI_FONT = "./AtariST8x16SystemFont.ttf"
 
@@ -53,28 +54,6 @@ COLORS = [
     MAGENTA,
     ORANGE
 ]
-
-
-def CmpPieces(piece1, piece2):
-    (o1x, o1y), p1 = piece1
-    (o2x, o2y), p2, = piece2
-    maxy1 = max(o1y + y for _, y in p1)
-    maxy2 = max(o1y + y for _, y in p2)
-    if maxy1 < maxy2:
-        return -1
-    if maxy2 > maxy1:
-        return 1
-    pm = {}
-    for x, y in p1:
-        pm[x + o1x] = min(pm.get(x + o1x, y + o1y),  y + o1y)
-    for x, y in p2:
-        if pm.get(x + o2x, y + o2y) < y + o2y:
-            return 1
-    return -1
-
-
-def SortPieces(pieces):
-    return sorted(pieces, key=functools.cmp_to_key(CmpPieces))
 
 
 BASE_OFFSET_Y = 24
@@ -119,48 +98,6 @@ def Draw(screen, text, t, font_tab):
                 x = n * 8 + ll[0] + pixel[0] + offset_x
                 y = ll[1] + pixel[1] + offset_y + BASE_OFFSET_Y
                 screen.SetPixel(x, y, 0, 255, 0)
-
-
-def MakeFontTab():
-    txt = Image.new("RGBA", ATARI_DIM, (0, 0, 0, 256))
-    draw = ImageDraw.Draw(txt)
-    print("loadinf:", ATARI_FONT)
-    font = ImageFont.truetype(ATARI_FONT, 16)
-    out = {}
-    for c in CHARS:
-        draw.rectangle((0, 0) + ATARI_DIM,  fill=(255, 255, 255, 255))
-        draw.text((0, 0), c, font=font, fill=(0, 0, 0, 255))
-
-        # print(bitmap)
-        print(f"\nNew char: [{c}] ")
-        print(tetris_font.DumpSurface(txt))
-        patterns = tetris_font.CheckSurface(txt)
-        out[c] = SortPieces([(ll, all[index])
-                             for ll, index, all in patterns])
-
-    return out
-
-
-def XXXmain():
-
-    FONT_TAB = MakeFontTab()
-    pygame.init()
-    screen = pygame.display.set_mode([SCREEN_W * SCALE, SCREEN_H * SCALE])
-    surface = pygame.Surface([SCREEN_W, SCREEN_H])
-    print("@@@@", surface.get_size(), screen.get_size())
-
-    t = 0
-    while True:
-        t += 1
-        Draw(surface, "Robert Muth 123 " * 10, t, FONT_TAB)
-        pygame.transform.scale(
-            surface, (SCREEN_W * SCALE, SCREEN_H * SCALE), screen)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                break
-        pygame.display.flip()
-    pygame.quit()
 
 
 def MakeMatrix(args):
@@ -249,7 +186,7 @@ def main():
     random.seed(66)
 
     matrix = MakeMatrix(args)
-    FONT_TAB = MakeFontTab()
+    dim, FONT_TAB = tetris_font.MakeFontTab(args.font_path, args.font_size, CHARS)
     canvas = matrix.CreateFrameCanvas()
     text = args.text
     t = 0

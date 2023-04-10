@@ -65,10 +65,9 @@ def time_for_char_to_arrive_at_loc(n, loc):
     return (loc + n) * 8 * SPEED_X
 
 
-def Draw(set_pixel, text, t, font_tab):
+def Draw(set_pixel, text, t, font_tab, colors):
 
     offset_x = 128 - t // SPEED_X
-    # screen.fill(WHITE)
     for n, c in enumerate(text):
         if c == " ":
             continue
@@ -92,12 +91,11 @@ def Draw(set_pixel, text, t, font_tab):
                 if offset_y < 0:
                     offset_y = 0
 
-            color = COLORS[num % len(COLORS)]
-            color = BLACK
+            color = colors[num % len(colors)]
             for pixel in piece:
                 x = n * 8 + ll[0] + pixel[0] + offset_x
                 y = ll[1] + pixel[1] + offset_y + BASE_OFFSET_Y
-                set_pixel((x, y), (0, 255, 0))
+                set_pixel((x, y), color)
 
 
 def MakeMatrix(args):
@@ -200,7 +198,7 @@ def main():
         t += 1
         canvas.Clear()
         canvas.Fill(0, 0, 0)
-        Draw(set_pixel, text, t, FONT_TAB)
+        Draw(set_pixel, text, t, FONT_TAB, COLORS)
         canvas = matrix.SwapOnVSync(canvas)
 
 

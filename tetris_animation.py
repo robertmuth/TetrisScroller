@@ -91,9 +91,8 @@ SCREEN_W = 128
 SCREEN_H = 64
 
 
-def Draw(screen, text, t, font_tab, font_w, colors):
+def Draw(set_pixel, text, t, font_tab, font_w, colors):
     offset_x = 128 - t // SPEED_X
-    screen.fill(WHITE)
     for n, c in enumerate(text):
         if c == " ":
             continue
@@ -121,7 +120,7 @@ def Draw(screen, text, t, font_tab, font_w, colors):
             for pixel in piece:
                 x = n * 8 + ll[0] + pixel[0] + offset_x
                 y = ll[1] + pixel[1] + offset_y + BASE_OFFSET_Y
-                screen.set_at((x, y), color)
+                set_pixel((x, y), color)
 
 
 def RenderPyGame(FONT_TAB, font_w, chars):
@@ -129,10 +128,14 @@ def RenderPyGame(FONT_TAB, font_w, chars):
     screen = pygame.display.set_mode([SCREEN_W * SCALE, SCREEN_H * SCALE])
     surface = pygame.Surface([SCREEN_W, SCREEN_H])
 
+    def set_pixel(pos, color):
+        surface.set_at(pos, color)
+
     t = 0
     while True:
         t += 1
-        Draw(surface, chars, t, FONT_TAB, font_w, GRAY_COLORS)
+        surface.fill(WHITE)
+        Draw(set_pixel, chars, t, FONT_TAB, font_w, GRAY_COLORS)
         pygame.transform.scale(
             surface, (SCREEN_W * SCALE, SCREEN_H * SCALE), screen)
 
@@ -159,18 +162,19 @@ CHARS = ("01234567890"
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--scroll_text", action="store",  type=str,
-                    help="Text to scroll.",
-                    default=CHARS)
+                        help="Text to scroll.",
+                        default=CHARS)
     parser.add_argument("--font_path", action="store",  type=str,
-                    help="Font Path.",
-                    default=ATARI_FONT)
+                        help="Font Path.",
+                        default=ATARI_FONT)
     parser.add_argument("--font_size", action="store",  type=int,
-                    help="Font Size.",
-                    default=ATARI_SIZE)
+                        help="Font Size.",
+                        default=ATARI_SIZE)
 
     random.seed(66)
     args = parser.parse_args()
-    dim, font_tab = tetris_font.MakeFontTab(args.font_path, args.font_size, CHARS * 10)
+    dim, font_tab = tetris_font.MakeFontTab(
+        args.font_path, args.font_size, CHARS * 10)
     #dim, font_tab = tetris_font.MakeFontTab(AMIGA_FONT, AMIGA_SIZE, CHARS * 10)
 
     RenderPyGame(font_tab, dim[0], args.scroll_text)
